@@ -1,0 +1,22 @@
+# Python bytecode
+__pycache__/
+*.py[cod]
+
+# Sanal ortam (Virtual Environment)
+venv/
+env/
+
+# Çıktı Dosyaları
+*.xlsx
+*.csv
+
+# Program Çıktıları
+dist/
+build/
+*.spec
+
+# Projeye özel yürütülebilir dosyalar
+Fatura_Projesi_Final.exe
+
+# XML klasörü (Örnek faturaları gizli tutmak istersen)
+xmller/
