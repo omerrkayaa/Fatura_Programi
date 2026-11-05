@@ -1,5 +1,6 @@
 import os
-import xml.etree.ElementTree as ET
+# defusedxml: dışarıdan gelen XML'de varlık genişletme (billion laughs) ve dış varlık (XXE) saldırılarını engeller
+from defusedxml import ElementTree as ET
 import pandas as pd
 
 XML_KLASORU = 'xmller'
@@ -58,7 +59,9 @@ def ana_program():
                     kdv_oran_str = degeri_bul(line, ['.//cac:TaxCategory/cbc:Percent', './/cac:TaxTotal//cbc:Percent'], NS)
                     kdv_oran = float(kdv_oran_str.replace(',', '.'))
                     
-                    kdv_tutari = (matrah * kdv_oran) / 100
+                    # Faturadaki KDV tutarı varsa o kullanılır (yuvarlamalar faturayla aynı kalır), yoksa hesaplanır
+                    kdv_tutari_str = degeri_bul(line, ['cac:TaxTotal/cbc:TaxAmount'], NS)
+                    kdv_tutari = float(kdv_tutari_str.replace(',', '.')) or (matrah * kdv_oran) / 100
                     genel_toplam = matrah + kdv_tutari
                     
                     grup = "Diger"

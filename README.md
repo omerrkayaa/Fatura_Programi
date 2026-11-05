@@ -1,32 +1,43 @@
-# E-Fatura Analiz Projesi 🧾
+# E-Fatura Analiz Programı
 
-Bu proje, XML formatındaki e-faturaları otomatik olarak okuyup, içerisindeki ürünleri belirli kategorilere göre gruplandırarak bir Excel raporu (`Fatura_Analiz_Raporu.xlsx`) oluşturur.
+XML formatındaki (UBL-TR) e-faturaları toplu olarak okur, her fatura satırını anahtar kelimelere göre bir ürün grubuna atar ve sonucu `Fatura_Analiz_Raporu.xlsx` adında bir Excel raporu olarak kaydeder.
 
-## 🚀 Özellikler
+## Özellikler
 
-* **Otomatik XML İşleme:** Belirlenen klasördeki tüm e-faturaları toplu halde okur.
-* **Akıllı Gruplandırma:** `urungruplari.txt` dosyasındaki anahtar kelimelere göre ürünleri (Takviye Gıda, Vitamin vb.) otomatik sınıflandırır.
-* **Finansal Hesaplama:** Matrah, KDV oranı ve Genel Toplam verilerini hatasız ayrıştırır.
-* **Excel Raporlama:** Tüm verileri düzenli bir tablo halinde dışa aktarır.
+- **Toplu işleme:** `xmller/` klasöründeki bütün `.xml` dosyalarını okur. Bozuk bir dosya yüzünden işlem durmaz; o dosya atlanır ve hatası ekrana yazılır.
+- **Gruplandırma:** `urungruplari.txt` içindeki `anahtar:grup` satırlarına göre ürün adında geçen kelimeyi arar (büyük/küçük harf fark etmez). Eşleşmeyen ürün "Diger" grubuna düşer.
+- **Tutarlar:** satır başına matrah, KDV oranı, KDV tutarı ve genel toplam. KDV tutarı faturada yazıyorsa o kullanılır, yoksa matrah ve orandan hesaplanır.
+- **Güvenli XML okuma:** dışarıdan gelen dosyalar `defusedxml` ile okunur. Böylece varlık genişletme (billion laughs) ve dış varlık (XXE) içeren zararlı XML'ler reddedilir.
 
-## 📂 Dosya Yapısı
-
-* `fatura_oku.py`: Analiz işlemini yapan ana Python kodu.
-* `urungruplari.txt`: Ürünlerin hangi gruba gireceğini belirleyen tanımlama dosyası.
-* `xmller/`: İşlenecek XML faturalarının konulacağı klasör.
-* `Fatura_Projesi_Final.exe`: Python yüklü olmayan bilgisayarlar için taşınabilir uygulama.
-
-## 🛠 Kullanım
-
-1.  **Hazırlık:** Analiz etmek istediğiniz XML faturalarını `xmller` isimli bir klasöre kopyalayın.
-2.  **Gruplandırma:** `urungruplari.txt` dosyasını açarak ürün anahtar kelimelerini şu formatta düzenleyin: `Marka/Ürün:Grup Adı` (Örn: `Suda:Takviye Gıda`).
-3.  **Çalıştırma:** * İster `fatura_oku.py` dosyasını çalıştırın,
-    * İsterseniz de `Fatura_Projesi_Final.exe` dosyasına çift tıklayın.
-4.  **Sonuç:** İşlem bittiğinde aynı klasörde `Fatura_Analiz_Raporu.xlsx` dosyası oluşacaktır.
-
-## 📦 Gereksinimler (Python için)
-
-Kodun çalışması için aşağıdaki kütüphanelerin yüklü olması gerekir:
+## Kullanım
 
 ```bash
-pip install pandas openpyxl
+pip install -r requirements.txt
+mkdir xmller
+cp ornek/ornek_fatura.xml xmller/     # denemek için örnek fatura; kendi faturalarınızı da buraya koyun
+python fatura_oku.py
+```
+
+Rapor aynı klasörde `Fatura_Analiz_Raporu.xlsx` olarak oluşur.
+
+`urungruplari.txt` biçimi (her satıra bir kural):
+
+```
+Suda:Takviye Gıda
+Youplus:Vitamin
+```
+
+## Python yüklü olmayan bilgisayarlar için
+
+PyInstaller ile tek dosyalık bir `.exe` üretilebilir. Üretilen dosya depoya eklenmez.
+
+```bash
+pip install pyinstaller
+pyinstaller --onefile --name Fatura_Projesi_Final fatura_oku.py
+```
+
+`.exe` dosyası `dist/` klasöründe oluşur. Yanına `urungruplari.txt` ve `xmller/` klasörü konmalıdır.
+
+## Gizlilik
+
+Gerçek faturalar kişisel ve ticari bilgi içerir. Bu yüzden `xmller/` klasörü ve üretilen Excel dosyaları `.gitignore` ile depo dışında tutulur. `ornek/` altındaki fatura uydurmadır.
